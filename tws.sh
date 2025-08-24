@@ -12,6 +12,7 @@
 #               Write current tmux layout to YAML (default: ~/.config/tmux/workspace.yaml)
 #               Always create a workspace.backup.yaml next to the target first
 #   ls          List current sessions and windows (with directories)
+#   edit        Open the YAML config in $EDITOR (creates if missing)
 #   diff        Show diff between YAML and current server windows:
 #                 - red minus (-): in YAML but not in server
 #                 + green plus (+): in server but not in YAML
@@ -30,7 +31,7 @@ TMUX_SOCKET=""
 TMUX_ARGS=""
 
 usage() {
-	printf '%s\n' "Usage: $0 [-L socket-name] [restart|kill|snapshot [yaml_path]|ls|diff]" >&2
+	printf '%s\n' "Usage: $0 [-L socket-name] [restart|kill|snapshot [yaml_path]|ls|diff|edit]" >&2
 	exit 2
 }
 
@@ -432,6 +433,18 @@ main() {
 	cmd="${1-}"
 
 	case "$cmd" in
+	edit)
+		# Open YAML config in $EDITOR (fallback to $VISUAL, then vi)
+		mkdir_p "$CONFIG_DIR"
+		if [ ! -f "$YAML_PATH" ]; then : >"$YAML_PATH"; fi
+		editor_cmd="${EDITOR:-${VISUAL:-vi}}"
+		if [ -z "$editor_cmd" ]; then
+			printf '%s\n' 'Error: $EDITOR is not set and no fallback found' >&2
+			exit 1
+		fi
+		# Preserve tmux socket env for nested calls if needed
+		$editor_cmd "$YAML_PATH"
+		;;
 	restart)
 		# Restart: kill server then (re)create from YAML and attach
 		kill_server

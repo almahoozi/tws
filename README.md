@@ -79,3 +79,5 @@ alias tws="{PATH_TO_SCRIPT}/tws.sh"
     - prints windows that are only on server in green
     - prints windows whose order has changed in red (old) and green (new)
     - prints windows whose names match but have different paths in yellow
+- Edit the YAML config in your $EDITOR (creates file if missing)
+  - `tws edit`
